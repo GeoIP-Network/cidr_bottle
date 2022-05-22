@@ -2,8 +2,10 @@
 ![Release Badge](https://gitlab.com/geoip.network/cidr-bottle/-/badges/release.svg)
 ![Pipeline Badge](https://gitlab.com/geoip.network/cidr-bottle/badges/master/pipeline.svg)
 
-CIDR-Bottle is yet another implementation of a Patricia Trie for handling network routing information.
+CIDR-Bottle is yet another implementation of a Patricia Trie for handling network routing information (such as ROAs & Routing Tables) for reconciliation.
 However, unlike other implementations it supports both sub-tree checking and longest-prefix matching.
+
+![A brief summary of the examples below](https://gitlab.com/geoip.network/cidr_bottle/-/blob/a57fe64864d8b05d71dde9ba32687319ca4fdbb8/screenshots/screenshot.png)
 
 CIDR-Bottle was designed specifically to be used for reconciling RIR Allocation & Assignment records with actual BGP Announcements.
 It isn't designed to be the fastest (it's written in pure python), but it should be the most full-featured implementation. 

@@ -22,10 +22,11 @@ release:
   image: python:3.9.12-buster
   script:
   - pip install poetry
+  - poetry config http-basic.pypi __token__ ${POETRY_PYPI_TOKEN_PYPI}
   - poetry update
   - poetry version ${CI_COMMIT_TAG}
   - poetry build
-  - poetry publish -u __token__ -p ${PYPI_KEY}
+  - poetry publish
   only:
   - tags
 sast:

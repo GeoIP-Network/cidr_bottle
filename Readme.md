@@ -1,6 +1,6 @@
 # CIDR-Bottle
-![Release Badge](https://gitlab.com/geoip.network/cidr-bottle/-/badges/release.svg)
-![Pipeline Badge](https://gitlab.com/geoip.network/cidr-bottle/badges/master/pipeline.svg)
+![Release Badge](https://gitlab.com/geoip.network/cidr_bottle/-/badges/release.svg)
+![Pipeline Badge](https://gitlab.com/geoip.network/cidr_bottle/badges/master/pipeline.svg)
 
 CIDR-Bottle is yet another implementation of a Patricia Trie for handling network routing information (such as ROAs & Routing Tables) for reconciliation.
 However, unlike other implementations it supports both sub-tree checking and longest-prefix matching.

@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "CIDR-Bottle"
+version = "1.0.0"
+description = "CIDR-Bottle is yet another Patricia Trie implmentation, however this one is specifically designed for parsing and validating CIDRS in routing tables and ROAs."
+authors = ["Tim Armstrong <tim@plaintextnerds.com>"]
+maintainers = ["Tim Armstrong <tim@plaintextnerds.com>"]
+license = "MIT"
+readme = "Readme.md"
+homepage = "https://geoip.network/"
+repository = "https://gitlab.com/geoip.network/cidr_bottle"
+classifiers = [
+    "Programming Language :: Python :: Implementation",
+    "Topic :: Internet",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Networking :: Firewalls",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Intended Audience :: Telecommunications Industry",
+]
+keywords = [
+    "cidr",
+    "routing",
+    "patricia",
+    "IPv6",
+    "IPv4",
+    "ROA",
+    "cidr-trie"
+]
+include = ["cidr_bottle"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+black = "^22.3.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

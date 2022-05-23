@@ -7,10 +7,20 @@
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 stages:
 - test
+- test_old
 - publish
 unit:
   stage: test
   image: python:3.9.12-buster
+  script:
+  - pip install poetry
+  - poetry update
+  - poetry build
+  - poetry install
+  - poetry run pytest
+unit_old:
+  stage: test_old
+  image: python:3.7.13-buster
   script:
   - pip install poetry
   - poetry update

@@ -23,11 +23,11 @@ from ipaddress import IPv4Network, IPv6Network
 ## Defaults to IPv4
 root = Bottle()  # 0.0.0.0/0
 
-## IPv6 mode is initialised by passing an IPv6 CIDR (either as a str or an instance of ipaddress.IPv6Network) 
-root6 = Bottle("::/0")  # ::/0
+## IPv6 mode is initialised by passing an IPv6 CIDR (either as an instance of ipaddress.IPv6Network) 
+root6 = Bottle(prefix=IPv6Network("::/0"))  # ::/0
 
 ## Supports detached (not starting at either 0.0.0.0/0 or ::/0) roots
-detached_root = Bottle("198.51.100.0/24")
+detached_root = Bottle(prefix=IPv4Network("198.51.100.0/24"))
 ```
 
 ### Racking a Bottle (Inserting a node)

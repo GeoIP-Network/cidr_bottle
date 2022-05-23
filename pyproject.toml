@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "CIDR-Bottle"
 version = "1.0.0"
-description = "CIDR-Bottle is yet another Patricia Trie implmentation, however this one is specifically designed for parsing and validating CIDRS in routing tables and ROAs."
+description = "CIDR-Bottle is yet another Patricia Trie implementation, however this one is specifically designed for parsing and validating CIDRS in routing tables and ROAs."
 authors = ["Tim Armstrong <tim@plaintextnerds.com>"]
 maintainers = ["Tim Armstrong <tim@plaintextnerds.com>"]
 license = "MIT"

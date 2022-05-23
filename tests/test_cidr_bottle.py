@@ -166,4 +166,3 @@ def test_children():
             subnets.append(line.strip())
     result = [node.prefix.compressed for node in root.children()]
     assert set(result) == set(subnets)
-

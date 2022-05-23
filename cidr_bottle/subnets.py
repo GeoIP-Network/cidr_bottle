@@ -16,4 +16,4 @@ def subnet_of(
     a = int(supernet.network_address)
     b = int(subnet.network_address)
     mask = supernet.prefixlen
-    return (a >> 32 - mask) == (b >> 32 - mask)
+    return (a >> supernet.max_prefixlen - mask) == (b >> supernet.max_prefixlen - mask)

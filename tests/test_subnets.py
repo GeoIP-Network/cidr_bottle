@@ -39,6 +39,11 @@ def test_valid_subnet_of_ipv6():
     assert target == result
 
 
+def test_valid_subnet_of_ipv6_2():
+    target = IPv6Network("2001:4200::/32").subnet_of(IPv6Network("::/0"))
+    result = subnet_of(IPv6Network("::/0"), IPv6Network("2001:4200::/32"))
+    assert target == result
+
 def test_invalid_subnet_of_ipv6():
     target = IPv6Network("2001:db8::/56").subnet_of(IPv6Network("2001:fb8::/32"))
     result = subnet_of(IPv6Network("2001:fb8::/32"), IPv6Network("2001:db8::/56"))

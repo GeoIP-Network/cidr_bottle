@@ -6,14 +6,19 @@ def subnet_of(
     supernet: Union[IPv4Network, IPv6Network], subnet: Union[IPv4Network, IPv6Network]
 ) -> bool:
     """
-    author: WatchMeSegfault (contributed on 2022-05-23 via Twitch)
+    author: WatchMeSegfault (contributed on 2022-05-23 via Twitch), optimised by Plaintextnerds
     description: A faster (approx. 6.5x) subnet checker
     """
-    if supernet.version != subnet.version:
+    super_version = 4 if isinstance(supernet, IPv4Network) else 6
+    super_addr = int(supernet.network_address)
+    super_prefix = supernet.prefixlen
+    sub_version = 4 if isinstance(subnet, IPv4Network) else 6
+    sub_addr = int(subnet.network_address)
+    sub_prefix = subnet.prefixlen
+    max_prefix = 32 if super_version == 4 else 128
+    if super_version != sub_version:
         raise ValueError("ip version mismatch")
-    if supernet.prefixlen > subnet.prefixlen:
+    if super_prefix > sub_prefix:
         return False
-    a = int(supernet.network_address)
-    b = int(subnet.network_address)
-    mask = supernet.prefixlen
-    return (a >> supernet.max_prefixlen - mask) == (b >> supernet.max_prefixlen - mask)
+    mask = max_prefix - super_prefix
+    return (super_addr >> mask) == (sub_addr >> mask)

@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from ipaddress import IPv4Network, IPv6Network, ip_network
 from typing import Union, Optional, Any
 
+from .subnets import subnet_of
+
 
 @dataclass()
 class Bottle:
@@ -37,7 +39,7 @@ class Bottle:
         node = self
         while node.prefix != network:
             left, right = node.prefix.subnets()
-            if network.subnet_of(left):
+            if subnet_of(left, network):
                 if (node.left is None) and not delete:
                     node.left = type(self)()
                     node.left.prefix = left
@@ -91,9 +93,9 @@ class Bottle:
             network = ip_network(network)
         node = self
         while node.prefix != network:
-            if not network.subnet_of(node.prefix):
+            if not subnet_of(node.prefix, network):
                 return None
-            if node.left is not None and network.subnet_of(node.left.prefix):
+            if node.left is not None and subnet_of(node.left.prefix, network):
                 node = node.left
             elif node.right is not None:
                 node = node.right

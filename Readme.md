@@ -101,11 +101,11 @@ root.delete("198.51.100.0/24")
 
 ## Installation (from pip):
 ```shell
-pip install geoip_network
+pip install cidr_bottle
 ```
 
 ## Installation (from source):
 ```shell
-git clone https://gitlab.com/geoip.network/python-library
+git clone https://gitlab.com/geoip.network/cidr_bottle
 poetry install
 ```

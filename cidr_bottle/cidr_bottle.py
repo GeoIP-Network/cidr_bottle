@@ -73,17 +73,21 @@ class Bottle:
     def children(self):
         descendants = []
         node = self
+        passed = {}
         while True:
-            if (not node.passing) and (node != self):
+            if not node.passing:
                 descendants.append(node)
-            if node.left is not None:
+            if node.prefix in passed:
+                node = node.parent
+            elif node.left is not None and node.left.prefix not in passed:
                 node = node.left
-            elif node.right is not None:
+            elif node.right is not None and node.right.prefix not in passed:
                 node = node.right
+            elif node.parent != None:
+                passed[node.prefix] = True
+                node = node.parent
             else:
-                if node.parent is None or node.parent.right is None:
-                    break
-                node = node.parent.right
+                break
         return descendants
 
     def get(

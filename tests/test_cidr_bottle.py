@@ -155,3 +155,15 @@ def test_delete():
     assert root[ip_network("128.0.0.0/1")].prefix == ip_network("128.0.0.0/1")
     assert root[ip_network("128.128.0.0/9")].prefix == ip_network("128.0.0.0/8")
     assert root[ip_network("128.128.0.0/9")].passing
+
+
+def test_children():
+    root = Bottle()
+    subnets = []
+    with open("tests/data/children_test_data") as f:
+        for line in f:
+            root.insert(line.strip())
+            subnets.append(line.strip())
+    result = [node.prefix.compressed for node in root.children()]
+    assert set(result) == set(subnets)
+

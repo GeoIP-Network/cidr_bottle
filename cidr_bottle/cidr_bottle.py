@@ -21,8 +21,30 @@ class Bottle:
     value: Any = field(default=None)
     passing: bool = field(default=True)
 
+    def get(
+        self, network: Union[str, IPv4Network, IPv6Network], exact: bool = False
+    ) -> "Bottle":
+        if isinstance(network, str):
+            network = ip_network(network)
+        node = self._find(network)
+        if exact and node.prefix != network:
+            raise KeyError("no exact match found")
+        return node
+
     def insert(self, network: Union[str, IPv4Network, IPv6Network], value=None):
         self.set(network, value=value)
+
+    def delete(self, network: Union[str, IPv4Network, IPv6Network]):
+        self.set(network, delete=True)
+
+    def contains(
+        self, network: Union[str, IPv4Network, IPv6Network], exact: bool = False
+    ) -> bool:
+        try:
+            self.get(network, exact)
+            return True
+        except KeyError:
+            return False
 
     def set(
         self, network: Union[str, IPv4Network, IPv6Network], value=None, delete=False
@@ -34,32 +56,14 @@ class Bottle:
             and network.version != self.prefix.version
         ):
             raise ValueError("incompatible network version")
-        if network < self.prefix:
-            raise ValueError("network is smaller than node")
-        node = self
-        while node.prefix != network:
-            left, right = node.prefix.subnets()
-            if subnet_of(left, network):
-                if (node.left is None) and not delete:
-                    node.left = type(self)()
-                    node.left.prefix = left
-                    node.left.parent = node
-                elif node.left is None:
-                    raise KeyError(
-                        f"attempting to delete non-existent key {network.compressed}"
-                    )
-                node = node.left
-            else:
-                if (node.right is None) and not delete:
-                    node.right = type(self)()
-                    node.right.prefix = right
-                    node.right.parent = node
-                elif node.right is None:
-                    raise KeyError(
-                        f"attempting to delete non-existent key {network.compressed}"
-                    )
-                node = node.right
+        if network.prefixlen < self.prefix.prefixlen:
+            raise ValueError("network is less specific than node")
+        node = self._find(network, not delete)
         if delete:
+            if node.prefix != network:
+                raise KeyError(
+                    f"attempting to delete non-existent key {network.compressed}"
+                )
             left, right = node.parent.prefix.subnets()
             if node.prefix == left:
                 node.parent.left = None
@@ -83,43 +87,12 @@ class Bottle:
                 node = node.left
             elif node.right is not None and node.right.prefix not in passed:
                 node = node.right
-            elif node.parent != None:
+            elif node.parent is not None:
                 passed[node.prefix] = True
                 node = node.parent
             else:
                 break
         return descendants
-
-    def get(
-        self, network: Union[str, IPv4Network, IPv6Network], exact: bool = False
-    ) -> "Bottle":
-        if isinstance(network, str):
-            network = ip_network(network)
-        node = self
-        while node.prefix != network:
-            if not subnet_of(node.prefix, network):
-                return None
-            if node.left is not None and subnet_of(node.left.prefix, network):
-                node = node.left
-            elif node.right is not None:
-                node = node.right
-            else:
-                break
-        if exact and node.prefix != network:
-            raise KeyError("no exact match found")
-        return node
-
-    def contains(
-        self, network: Union[str, IPv4Network, IPv6Network], exact: bool = False
-    ) -> bool:
-        try:
-            self.get(network, exact)
-            return True
-        except KeyError:
-            return False
-
-    def delete(self, network: Union[str, IPv4Network, IPv6Network]):
-        self.set(network, delete=True)
 
     def __str__(self):
         return self.prefix.compressed
@@ -140,3 +113,28 @@ class Bottle:
 
     def __delitem__(self, network: Union[str, IPv4Network, IPv6Network]):
         self.set(network, delete=True)
+
+    def _create_node(self, prefix: Union[IPv4Network, IPv6Network], parent: "Bottle") -> "Bottle":
+        node = type(self)()
+        node.prefix = prefix
+        node.parent = parent
+        return node
+
+    def _find(self, network: Union[str, IPv4Network, IPv6Network], create_if_missing: bool = False):
+        node = self
+        while node.prefix != network:
+            left, right = node.prefix.subnets()
+            is_left = subnet_of(left, network)
+            if not subnet_of(node.prefix, network):
+                return None
+            if (node.left is None) and is_left and create_if_missing:
+                node.left = self._create_node(left, node)
+            elif node.left is not None and is_left:
+                node = node.left
+            elif (node.right is None) and not is_left and create_if_missing:
+                node.right = self._create_node(right, node)
+            elif node.right is not None and not is_left:
+                node = node.right
+            else:
+                break
+        return node

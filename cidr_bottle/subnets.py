@@ -6,7 +6,7 @@ def subnet_of(
     supernet: Union[IPv4Network, IPv6Network], subnet: Union[IPv4Network, IPv6Network]
 ) -> bool:
     """
-    author: WatchMeSegfault (contributed on 2022-05-23 via Twitch), optimised by Plaintextnerds
+    author: WatchMeSegfault (contributed on 2022-05-23 via Twitch)
     description: A faster (approx. 6.5x) subnet checker
     """
     super_version = 4 if isinstance(supernet, IPv4Network) else 6

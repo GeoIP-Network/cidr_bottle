@@ -1,8 +1,12 @@
 from dataclasses import dataclass, field
+from functools import partial
 from ipaddress import IPv4Network, IPv6Network, ip_network
 from typing import Union, Optional, Any
 
 from .subnets import subnet_of
+
+
+_default_v4 = partial(IPv4Network, "0.0.0.0/0")
 
 
 @dataclass()
@@ -17,7 +21,7 @@ class Bottle:
     left: "Bottle" = field(default=None)
     right: "Bottle" = field(default=None)
     parent: "Bottle" = field(default=None)
-    prefix: Union[IPv4Network, IPv6Network] = field(default=IPv4Network("0.0.0.0/0"))
+    prefix: Union[IPv4Network, IPv6Network] = field(default_factory=_default_v4)
     value: Any = field(default=None)
     passing: bool = field(default=True)
 
@@ -52,8 +56,7 @@ class Bottle:
         if isinstance(network, str):
             network = ip_network(network)
         if (
-            self.prefix != IPv4Network("0.0.0.0/0")
-            and network.version != self.prefix.version
+            network.version != self.prefix.version
         ):
             raise ValueError("incompatible network version")
         if network.prefixlen < self.prefix.prefixlen:
@@ -125,15 +128,17 @@ class Bottle:
         while node.prefix != network:
             left, right = node.prefix.subnets()
             is_left = subnet_of(left, network)
+            has_left = node.left is not None
+            has_right = node.right is not None
             if not subnet_of(node.prefix, network):
                 return None
-            if (node.left is None) and is_left and create_if_missing:
+            if not has_left and is_left and create_if_missing:
                 node.left = self._create_node(left, node)
-            elif node.left is not None and is_left:
+            elif has_left and is_left:
                 node = node.left
-            elif (node.right is None) and not is_left and create_if_missing:
+            elif not has_right and not is_left and create_if_missing:
                 node.right = self._create_node(right, node)
-            elif node.right is not None and not is_left:
+            elif has_right and not is_left:
                 node = node.right
             else:
                 break

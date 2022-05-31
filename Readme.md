@@ -11,6 +11,9 @@ CIDR-Bottle was designed specifically to be used for reconciling RIR Allocation 
 It isn't designed to be the fastest (it's written in pure python), but it should be the most full-featured implementation. 
 That said, unless you're writing a routing engine in python (in which case I'd be really interested to know why), speed shouldn't be a significant issue.
 
+## Dependencies
+* [CIDR-Man](https://pypi.org/project/cidr-man/) *Thwip, Thwip!*
+
 ## Usage
 ### Initialisation
 By default, a CIDR-Bottle is in IPv4 mode, to use IPv6 mode you must supply an IPv6 CIDR.
@@ -97,6 +100,10 @@ del root["198.51.100.0/24"]
 ### or
 root.delete("198.51.100.0/24")
 ```
+
+
+## *More Speed*
+If you want to squeeze out every last drop of performance and don't mind the limitation of being forced to use [CIDR-Man's](https://pypi.org/project/cidr-man/) `CIDR` then you can use `FastBottle` instead of `Bottle`.
 
 
 ## Installation (from pip):

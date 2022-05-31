@@ -1,1 +1,1 @@
-from .cidr_bottle import Bottle
+from .cidr_bottle import Bottle, FastBottle

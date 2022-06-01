@@ -30,9 +30,10 @@ unit_old:
 release:
   stage: publish
   image: python:3.9.12-buster
+  environment:
+    POETRY_PYPI_TOKEN_PYPI=${POETRY_PYPI_TOKEN_PYPI}
   script:
   - pip install poetry
-  - poetry config http-basic.pypi __token__ ${POETRY_PYPI_TOKEN_PYPI}
   - poetry update
   - poetry version ${CI_COMMIT_TAG}
   - poetry build

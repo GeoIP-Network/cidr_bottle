@@ -151,10 +151,12 @@ class FastBottle:
                 return None
             if not has_left and is_left and create_if_missing:
                 node.left = self._create_node(node._prefix.left, node)
+                node = node.left
             elif has_left and is_left:
                 node = node.left
             elif not has_right and not is_left and create_if_missing:
                 node.right = self._create_node(node._prefix.right, node)
+                node = node.right
             elif has_right and not is_left:
                 node = node.right
             else:

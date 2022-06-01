@@ -102,11 +102,12 @@ def test_ipv6_insert_right_network():
 def test_insert_deep_network():
     root = Bottle()
     root.insert(CIDR("192.0.2.0/24"))
+    root.insert(CIDR("203.0.113.0/24"))
     assert root.left is None
     assert root.right is not None
     assert root.right.right is not None
     assert root.right.right.left is not None
-    assert len(root.children()) == 1
+    assert len(root.children()) == 2
     assert root.right.prefix == CIDR("128.0.0.0/1")
     assert root.children()[0].prefix == CIDR("192.0.2.0/24")
 

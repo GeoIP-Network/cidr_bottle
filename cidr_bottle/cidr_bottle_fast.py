@@ -106,7 +106,7 @@ class FastBottle:
             node = self
             passed = {}
             while True:
-                if not node.passing:
+                if not node.passing and node.prefix not in descendants:
                     descendants[node.prefix] = node
                 if node._prefix in passed:
                     node = node.parent

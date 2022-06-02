@@ -18,6 +18,8 @@ class FastBottle:
     _prefix: CIDR = field(default_factory=CIDR)
     value: Any = field(default=None)
     passing: bool = field(default=True)
+    _children: Optional[list] = field(default=None)
+    _changed: bool = field(default=True)
 
     def __init__(
             self,
@@ -37,6 +39,8 @@ class FastBottle:
             self._prefix = prefix
         self.value = value
         self.passing = passing
+        self._children = None
+        self._changed = True
 
     @property
     def prefix(self):
@@ -72,6 +76,7 @@ class FastBottle:
     def set(
         self, network: CIDR, value=None, delete=False
     ) -> "FastBottle":
+        self._changed = True
         if (
             network.version != self._prefix.version
         ):
@@ -96,24 +101,27 @@ class FastBottle:
         return node
 
     def children(self):
-        descendants = []
-        node = self
-        passed = {}
-        while True:
-            if not node.passing:
-                descendants.append(node)
-            if node._prefix in passed:
-                node = node.parent
-            elif node.left is not None and node.left._prefix not in passed:
-                node = node.left
-            elif node.right is not None and node.right._prefix not in passed:
-                node = node.right
-            elif node.parent is not None:
-                passed[node._prefix] = True
-                node = node.parent
-            else:
-                break
-        return descendants
+        if self._changed:
+            descendants = {}
+            node = self
+            passed = {}
+            while True:
+                if not node.passing:
+                    descendants[node.prefix] = node
+                if node._prefix in passed:
+                    node = node.parent
+                elif node.left is not None and node.left._prefix not in passed:
+                    node = node.left
+                elif node.right is not None and node.right._prefix not in passed:
+                    node = node.right
+                elif node.parent is not None:
+                    passed[node._prefix] = True
+                    node = node.parent
+                else:
+                    break
+            self._children = list(descendants.values())
+            self._changed = False
+        return self._children
 
     def __str__(self):
         return self._prefix.compressed

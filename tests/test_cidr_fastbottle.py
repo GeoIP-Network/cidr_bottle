@@ -153,3 +153,8 @@ def test_children():
             subnets.append(line.strip())
     result = [node.prefix.compressed for node in root.children()]
     assert set(result) == set(subnets)
+    assert root._changed is False
+    root.insert(CIDR("192.0.2.0/24"))
+    assert root._changed is True
+    result = [node.prefix.compressed for node in root.children()]
+    assert root._changed is False

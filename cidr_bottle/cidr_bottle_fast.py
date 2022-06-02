@@ -22,13 +22,13 @@ class FastBottle:
     _changed: bool = field(default=True)
 
     def __init__(
-            self,
-            left: "FastBottle" = None,
-            right: "FastBottle" = None,
-            parent: "FastBottle" = None,
-            prefix: CIDR = None,
-            value: Any = None,
-            passing: bool = True
+        self,
+        left: "FastBottle" = None,
+        right: "FastBottle" = None,
+        parent: "FastBottle" = None,
+        prefix: CIDR = None,
+        value: Any = None,
+        passing: bool = True,
     ):
         self.left = left
         self.right = right
@@ -50,9 +50,7 @@ class FastBottle:
     def prefix(self, prefix: CIDR):
         self._prefix = prefix
 
-    def get(
-        self, network: CIDR, exact: bool = False
-    ) -> "FastBottle":
+    def get(self, network: CIDR, exact: bool = False) -> "FastBottle":
         node = self._find(network)
         if exact and node._prefix != network:
             raise KeyError("no exact match found")
@@ -64,22 +62,16 @@ class FastBottle:
     def delete(self, network: CIDR):
         self.set(network, delete=True)
 
-    def contains(
-        self, network: CIDR, exact: bool = False
-    ) -> bool:
+    def contains(self, network: CIDR, exact: bool = False) -> bool:
         try:
             self.get(network, exact)
             return True
         except KeyError:
             return False
 
-    def set(
-        self, network: CIDR, value=None, delete=False
-    ) -> "FastBottle":
+    def set(self, network: CIDR, value=None, delete=False) -> "FastBottle":
         self._changed = True
-        if (
-            network.version != self._prefix.version
-        ):
+        if network.version != self._prefix.version:
             raise ValueError("incompatible network version")
         if network.prefix_len < self._prefix.prefix_len:
             raise ValueError("network is less specific than node")
@@ -132,9 +124,7 @@ class FastBottle:
     def __contains__(self, network: CIDR) -> bool:
         return self.contains(network)
 
-    def __getitem__(
-        self, network: CIDR
-    ) -> Optional["FastBottle"]:
+    def __getitem__(self, network: CIDR) -> Optional["FastBottle"]:
         return self.get(network)
 
     def __setitem__(self, network: CIDR, value):

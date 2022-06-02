@@ -126,13 +126,9 @@ def test_get():
 def test_get_exact():
     root = Bottle()
     root.insert(CIDR("128.0.0.0/1"), 1)
-    assert root.get(CIDR("128.0.0.0/1"), exact=True).prefix == CIDR(
-        "128.0.0.0/1"
-    )
+    assert root.get(CIDR("128.0.0.0/1"), exact=True).prefix == CIDR("128.0.0.0/1")
     with pytest.raises(KeyError):
-        assert root.get(CIDR("128.128.0.0/9"), exact=True).prefix == CIDR(
-            "128.0.0.0/1"
-        )
+        assert root.get(CIDR("128.128.0.0/9"), exact=True).prefix == CIDR("128.0.0.0/1")
 
 
 def test_prefix():

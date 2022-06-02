@@ -23,14 +23,25 @@ class Bottle(FastBottle):
     passing: bool
 
     def __init__(
-            self,
-            left: "Bottle" = None,
-            right: "Bottle" = None,
-            parent: "Bottle" = None,
-            prefix: Union[str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address, None] = None,
-            value: Any = None,
-            passing: bool = True,
-            cls: Type = None):
+        self,
+        left: "Bottle" = None,
+        right: "Bottle" = None,
+        parent: "Bottle" = None,
+        prefix: Union[
+            str,
+            int,
+            bytes,
+            CIDR,
+            IPv4Network,
+            IPv6Network,
+            IPv4Address,
+            IPv6Address,
+            None,
+        ] = None,
+        value: Any = None,
+        passing: bool = True,
+        cls: Type = None,
+    ):
         super().__init__()
         self.left = left
         self.right = right
@@ -50,7 +61,20 @@ class Bottle(FastBottle):
         return self.__convert(self._prefix)
 
     @prefix.setter
-    def prefix(self, prefix: Union[str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address, None]):
+    def prefix(
+        self,
+        prefix: Union[
+            str,
+            int,
+            bytes,
+            CIDR,
+            IPv4Network,
+            IPv6Network,
+            IPv4Address,
+            IPv6Address,
+            None,
+        ],
+    ):
         if not isinstance(prefix, CIDR):
             self._prefix = CIDR(prefix)
         else:
@@ -58,7 +82,11 @@ class Bottle(FastBottle):
         self._cls = type(prefix)
 
     def get(
-        self, network: Union[str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address], exact: bool = False
+        self,
+        network: Union[
+            str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address
+        ],
+        exact: bool = False,
     ) -> "Bottle":
         if not isinstance(network, CIDR):
             network = CIDR(network)
@@ -67,26 +95,46 @@ class Bottle(FastBottle):
             raise KeyError("no exact match found")
         return node
 
-    def insert(self, network: Union[str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address], value=None):
+    def insert(
+        self,
+        network: Union[
+            str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address
+        ],
+        value=None,
+    ):
         if not isinstance(network, CIDR):
             network = CIDR(network)
         node = self.set(network, value=value)
         node._cls = self._cls
 
-    def delete(self, network: Union[str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address]):
+    def delete(
+        self,
+        network: Union[
+            str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address
+        ],
+    ):
         if not isinstance(network, CIDR):
             network = CIDR(network)
         self.set(network, delete=True)
 
     def contains(
-        self, network: Union[str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address], exact: bool = False
+        self,
+        network: Union[
+            str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address
+        ],
+        exact: bool = False,
     ) -> bool:
         if not isinstance(network, CIDR):
             network = CIDR(network)
         return super().contains(network, exact)
 
     def set(
-        self, network: Union[str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address], value=None, delete=False
+        self,
+        network: Union[
+            str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address
+        ],
+        value=None,
+        delete=False,
     ):
         if not isinstance(network, CIDR):
             network = CIDR(network)
@@ -132,7 +180,11 @@ class Bottle(FastBottle):
             network = CIDR(network)
         return super().set(network, delete=True)
 
-    def _find(self, network: Union[str, CIDR, IPv4Network, IPv6Network], create_if_missing: bool = False):
+    def _find(
+        self,
+        network: Union[str, CIDR, IPv4Network, IPv6Network],
+        create_if_missing: bool = False,
+    ):
         if not isinstance(network, CIDR):
             network = CIDR(network)
         return super()._find(network, create_if_missing)

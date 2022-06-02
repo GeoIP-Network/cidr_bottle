@@ -87,7 +87,7 @@ class Bottle(FastBottle):
             str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address
         ],
         exact: bool = False,
-        covering: bool = False
+        covering: bool = False,
     ) -> "Bottle":
         if not isinstance(network, CIDR):
             network = CIDR(network)
@@ -185,7 +185,7 @@ class Bottle(FastBottle):
         self,
         network: Union[str, CIDR, IPv4Network, IPv6Network],
         create_if_missing: bool = False,
-        covering: bool = False
+        covering: bool = False,
     ):
         if not isinstance(network, CIDR):
             network = CIDR(network)

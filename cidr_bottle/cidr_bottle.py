@@ -87,10 +87,11 @@ class Bottle(FastBottle):
             str, int, bytes, CIDR, IPv4Network, IPv6Network, IPv4Address, IPv6Address
         ],
         exact: bool = False,
+        covering: bool = False
     ) -> "Bottle":
         if not isinstance(network, CIDR):
             network = CIDR(network)
-        node = self._find(network)
+        node = self._find(network, covering)
         if exact and node.prefix != network:
             raise KeyError("no exact match found")
         return node
@@ -184,7 +185,8 @@ class Bottle(FastBottle):
         self,
         network: Union[str, CIDR, IPv4Network, IPv6Network],
         create_if_missing: bool = False,
+        covering: bool = False
     ):
         if not isinstance(network, CIDR):
             network = CIDR(network)
-        return super()._find(network, create_if_missing)
+        return super()._find(network, create_if_missing, covering=covering)

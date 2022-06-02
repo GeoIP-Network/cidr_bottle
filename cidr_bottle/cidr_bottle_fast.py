@@ -50,8 +50,8 @@ class FastBottle:
     def prefix(self, prefix: CIDR):
         self._prefix = prefix
 
-    def get(self, network: CIDR, exact: bool = False) -> "FastBottle":
-        node = self._find(network)
+    def get(self, network: CIDR, exact: bool = False, covering: bool = False) -> "FastBottle":
+        node = self._find(network, covering=covering)
         if exact and node._prefix != network:
             raise KeyError("no exact match found")
         return node
@@ -139,7 +139,7 @@ class FastBottle:
         node.parent = parent
         return node
 
-    def _find(self, network: CIDR, create_if_missing: bool = False, cls: Type = None):
+    def _find(self, network: CIDR, create_if_missing: bool = False, covering: bool = False):
         node = self
         while node._prefix != network:
             is_left = node._prefix.left.contains(network)
@@ -159,4 +159,9 @@ class FastBottle:
                 node = node.right
             else:
                 break
+        if covering and node.passing:
+            while node.passing and node.parent is not None:
+                node = node.parent
+            if node.passing and node.parent is None:
+                node = None
         return node

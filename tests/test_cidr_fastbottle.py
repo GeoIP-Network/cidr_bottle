@@ -152,5 +152,15 @@ def test_children():
     assert root._changed is False
     root.insert(CIDR("192.0.2.0/24"))
     assert root._changed is True
-    result = [node.prefix.compressed for node in root.children()]
+    root.children()
     assert root._changed is False
+
+
+def test_covering():
+    root = FastBottle()
+    root.insert(CIDR("192.0.2.128/26"))
+    assert root.get(CIDR("192.0.2.0/26")).prefix == CIDR("192.0.2.0/24")
+    assert root.get(CIDR("192.0.2.0/26")).passing
+    assert root.get(CIDR("192.0.2.0/26"), covering=True) is None
+    assert root.get(CIDR("192.0.2.129/32"), covering=True) is not None
+    assert root.get(CIDR("192.0.2.129/32")).prefix == CIDR("192.0.2.128/26")

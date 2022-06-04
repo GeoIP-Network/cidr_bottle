@@ -160,15 +160,11 @@ class FastBottle:
                 break
             if is_right:
                 if not has_right and create_if_missing:
-                    node.right = self._create_node(
-                        node._prefix.right, node
-                    )
+                    node.right = self._create_node(node._prefix.right, node)
                 node = node.right
             else:
                 if not has_left and create_if_missing:
-                    node.left = self._create_node(
-                        node._prefix.left, node
-                    )
+                    node.left = self._create_node(node._prefix.left, node)
                 node = node.left
         if covering and node.passing:
             while node is not None and node.passing:

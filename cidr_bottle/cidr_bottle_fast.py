@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Any, Type
 
 from cidr_man import CIDR
+from cidr_man.cidr import max_prefix
 
 
 @dataclass(init=False)
@@ -144,28 +145,32 @@ class FastBottle:
     def _find(
         self, network: CIDR, create_if_missing: bool = False, covering: bool = False
     ):
+        if not self._prefix.contains(network):
+            return None
         node = self
-        while node._prefix != network:
-            is_left = node._prefix.left.contains(network)
+        shift_bit = max_bits = max_prefix(self._prefix.version)
+        while shift_bit > (max_bits - network.prefix_len) and node is not None:
+            shift_bit -= 1
+            is_right = bool(network.ip >> shift_bit & 1)
             has_left = node.left is not None
             has_right = node.right is not None
-            if not node._prefix.contains(network):
-                return None
-            if not has_left and is_left and create_if_missing:
-                node.left = self._create_node(node._prefix.left, node)
-                node = node.left
-            elif has_left and is_left:
-                node = node.left
-            elif not has_right and not is_left and create_if_missing:
-                node.right = self._create_node(node._prefix.right, node)
-                node = node.right
-            elif has_right and not is_left:
+            if not create_if_missing and (
+                (not is_right and not has_left) or (is_right and not has_right)
+            ):
+                break
+            if is_right:
+                if not has_right and create_if_missing:
+                    node.right = self._create_node(
+                        node._prefix.right, node
+                    )
                 node = node.right
             else:
-                break
+                if not has_left and create_if_missing:
+                    node.left = self._create_node(
+                        node._prefix.left, node
+                    )
+                node = node.left
         if covering and node.passing:
-            while node.passing and node.parent is not None:
+            while node is not None and node.passing:
                 node = node.parent
-            if node.passing and node.parent is None:
-                node = None
         return node

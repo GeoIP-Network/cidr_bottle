@@ -1,11 +1,10 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import Optional, Any, Type
 
 from cidr_man import CIDR
 from cidr_man.cidr import max_prefix
 
 
-@dataclass(init=False)
 class FastBottle:
     """
     Similar to cidr_bottle.Bottle, cidr_bottle.FastBottle is a Patricia Trie specifically designed for parsing and validating routing tables.
@@ -101,16 +100,25 @@ class FastBottle:
             node = self
             passed = {}
             while True:
-                if not node.passing and node.prefix not in descendants:
-                    descendants[node.prefix] = node
-                if node._prefix in passed:
+                prefix = (node._prefix.ip, node._prefix.prefix_len)
+                if not node.passing and prefix not in descendants:
+                    descendants[prefix] = node
+                if prefix in passed:
                     node = node.parent
-                elif node.left is not None and node.left._prefix not in passed:
+                elif (
+                    node.left is not None
+                    and (node.left._prefix.ip, node.left._prefix.prefix_len)
+                    not in passed
+                ):
                     node = node.left
-                elif node.right is not None and node.right._prefix not in passed:
+                elif (
+                    node.right is not None
+                    and (node.right._prefix.ip, node.right._prefix.prefix_len)
+                    not in passed
+                ):
                     node = node.right
                 elif node.parent is not None:
-                    passed[node._prefix] = True
+                    passed[prefix] = True
                     node = node.parent
                 else:
                     break
@@ -137,36 +145,37 @@ class FastBottle:
         self.set(network, delete=True)
 
     def _create_node(self, prefix: CIDR, parent: "FastBottle") -> "FastBottle":
-        node = type(self)()
-        node._prefix = prefix
-        node.parent = parent
-        return node
+        return self.__class__(parent=parent, prefix=prefix)
 
     def _find(
         self, network: CIDR, create_if_missing: bool = False, covering: bool = False
     ):
-        if not self._prefix.contains(network):
+        shift_bit = max_bits = max_prefix(self._prefix.version)
+        max_shift = max_bits - network.prefix_len
+        ip = network.ip
+        mask = max_bits - self._prefix.prefix_len
+        if (self._prefix.ip >> mask) != (ip >> mask):
             return None
         node = self
-        shift_bit = max_bits = max_prefix(self._prefix.version)
-        while shift_bit > (max_bits - network.prefix_len) and node is not None:
+        most_recent_non_passing = None
+        while shift_bit > max_shift and node is not None:
             shift_bit -= 1
-            is_right = bool(network.ip >> shift_bit & 1)
-            has_left = node.left is not None
-            has_right = node.right is not None
-            if not create_if_missing and (
-                (not is_right and not has_left) or (is_right and not has_right)
-            ):
-                break
-            if is_right:
-                if not has_right and create_if_missing:
-                    node.right = self._create_node(node._prefix.right, node)
+            if ip >> shift_bit & 1:
+                if node.right is None:
+                    if create_if_missing:
+                        node.right = self._create_node(node._prefix.right, node)
+                    else:
+                        break
                 node = node.right
             else:
-                if not has_left and create_if_missing:
-                    node.left = self._create_node(node._prefix.left, node)
+                if node.left is None:
+                    if create_if_missing:
+                        node.left = self._create_node(node._prefix.left, node)
+                    else:
+                        break
                 node = node.left
+            if not node.passing:
+                most_recent_non_passing = node
         if covering and node.passing:
-            while node is not None and node.passing:
-                node = node.parent
+            node = most_recent_non_passing
         return node

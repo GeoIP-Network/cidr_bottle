@@ -51,37 +51,37 @@ class FastBottle:
         self._prefix = prefix
 
     def get(
-        self, network: CIDR, exact: bool = False, covering: bool = False
+        self, prefix: CIDR, exact: bool = False, covering: bool = False
     ) -> "FastBottle":
-        node = self._find(network, covering=covering)
-        if exact and node._prefix != network:
+        node = self._find(prefix, covering=covering)
+        if exact and node._prefix != prefix:
             raise KeyError("no exact match found")
         return node
 
-    def insert(self, network: CIDR, value=None):
-        self.set(network, value=value)
+    def insert(self, prefix: CIDR, value=None):
+        self.set(prefix, value=value)
 
-    def delete(self, network: CIDR):
-        self.set(network, delete=True)
+    def delete(self, prefix: CIDR):
+        self.set(prefix, delete=True)
 
-    def contains(self, network: CIDR, exact: bool = False) -> bool:
+    def contains(self, prefix: CIDR, exact: bool = False) -> bool:
         try:
-            self.get(network, exact)
+            self.get(prefix, exact)
             return True
         except KeyError:
             return False
 
-    def set(self, network: CIDR, value=None, delete=False) -> "FastBottle":
+    def set(self, prefix: CIDR, value=None, delete=False) -> "FastBottle":
         self._changed = True
-        if network.version != self._prefix.version:
+        if prefix.version != self._prefix.version:
             raise ValueError("incompatible network version")
-        if network.prefix_len < self._prefix.prefix_len:
+        if prefix.prefix_len < self._prefix.prefix_len:
             raise ValueError("network is less specific than node")
-        node = self._find(network, not delete)
+        node = self._find(prefix, not delete)
         if delete:
-            if node._prefix != network:
+            if node._prefix != prefix:
                 raise KeyError(
-                    f"attempting to delete non-existent key {network.compressed}"
+                    f"attempting to delete non-existent key {prefix.compressed}"
                 )
             left, right = node.parent._prefix.subnets()
             if node._prefix == left:
@@ -132,27 +132,27 @@ class FastBottle:
     def __repr__(self):
         return f"{type(self).__name__}(prefix={self._prefix}, value={self.value}, passing={self.passing})"
 
-    def __contains__(self, network: CIDR) -> bool:
-        return self.contains(network)
+    def __contains__(self, prefix: CIDR) -> bool:
+        return self.contains(prefix)
 
-    def __getitem__(self, network: CIDR) -> Optional["FastBottle"]:
-        return self.get(network)
+    def __getitem__(self, prefix: CIDR) -> Optional["FastBottle"]:
+        return self.get(prefix)
 
-    def __setitem__(self, network: CIDR, value):
-        self.insert(network, value)
+    def __setitem__(self, prefix: CIDR, value):
+        self.insert(prefix, value)
 
-    def __delitem__(self, network: CIDR):
-        self.set(network, delete=True)
+    def __delitem__(self, prefix: CIDR):
+        self.set(prefix, delete=True)
 
     def _create_node(self, prefix: CIDR, parent: "FastBottle") -> "FastBottle":
         return self.__class__(parent=parent, prefix=prefix)
 
     def _find(
-        self, network: CIDR, create_if_missing: bool = False, covering: bool = False
+        self, prefix: CIDR, create_if_missing: bool = False, covering: bool = False
     ):
         shift_bit = max_bits = max_prefix(self._prefix.version)
-        max_shift = max_bits - network.prefix_len
-        ip = network.ip
+        max_shift = max_bits - prefix.prefix_len
+        ip = prefix.ip
         mask = max_bits - self._prefix.prefix_len
         if (self._prefix.ip >> mask) != (ip >> mask):
             return None

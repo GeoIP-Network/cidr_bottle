@@ -58,8 +58,8 @@ class FastBottle:
             raise KeyError("no exact match found")
         return node
 
-    def insert(self, prefix: CIDR, value=None):
-        self.set(prefix, value=value)
+    def insert(self, prefix: CIDR, value: Any = None, aggregate: bool = False):
+        self.set(prefix, value=value, aggregate=aggregate)
 
     def delete(self, prefix: CIDR):
         self.set(prefix, delete=True)
@@ -71,7 +71,9 @@ class FastBottle:
         except KeyError:
             return False
 
-    def set(self, prefix: CIDR, value=None, delete=False) -> "FastBottle":
+    def set(
+        self, prefix: CIDR, value=None, delete=False, aggregate=False
+    ) -> "FastBottle":
         self._changed = True
         if prefix.version != self._prefix.version:
             raise ValueError("incompatible network version")
@@ -92,6 +94,18 @@ class FastBottle:
         else:
             node.value = value
             node.passing = False
+            parent = node.parent
+            if aggregate and parent.passing:
+                while None not in (parent.left, parent.right) and not (
+                    parent.left.passing or parent.right.passing
+                ):
+                    parent.passing = False
+                    if parent.value is None:
+                        parent.value = node.value
+                    if parent.parent is not None:
+                        parent = parent.parent
+                    else:
+                        break
         return node
 
     def children(self):

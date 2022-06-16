@@ -48,9 +48,20 @@ root.insert(IPv6Network("2001:db8::/48"))
 root.insert("198.51.100.0/24", {"example": "dict"})
 root.insert("198.51.100.0/24", "string example")
 
+## Supports automatic aggregation on insert.
+root.insert(CIDR("192.0.2.128/25"), value="a")
+root.insert(CIDR("192.0.2.0/25"), value="b", aggregate=True)
+root.insert(CIDR("192.0.3.0/24"), value="c", aggregate=True)
+if root.get(CIDR("192.0.2.0/23")).value == "c":  
+    ## This will evaluate as True as the two /25's will trigger the creation of the /24 and the addition of the other adjacent /24
+    ## will trigger the creation of the /23 
+
 ## Supports dict-style indexing
 root["198.51.100.0/24"] = "string example"
 ```
+
+*Note: Setting `aggregate=True` will (if`node.parent.left` and `node.parent.right` are populated) insert the node as normal, automatically set the parent object to `passing=False`, 
+and copy the `value` from the current insert to the `parent`.* 
 
 ### Contains CIDR?
 Returns `True` where there is a covering prefix, otherwise false.

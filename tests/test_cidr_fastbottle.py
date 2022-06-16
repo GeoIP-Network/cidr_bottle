@@ -164,3 +164,17 @@ def test_covering():
     assert root.get(CIDR("192.0.2.0/26"), covering=True) is None
     assert root.get(CIDR("192.0.2.129/32"), covering=True) is not None
     assert root.get(CIDR("192.0.2.129/32")).prefix == CIDR("192.0.2.128/26")
+
+
+def test_aggregate():
+    root = FastBottle()
+    root.insert(CIDR("192.0.3.0/24"), value="c", aggregate=True)
+    root.insert(CIDR("192.0.2.128/25"), value="a")
+    root.insert(CIDR("192.0.2.0/25"), value="b", aggregate=True)
+    assert not root.get(CIDR("192.0.2.0/23")).passing
+    assert not root.get(CIDR("192.0.2.0/24")).passing
+    assert root.get(CIDR("192.0.2.128/25")).value == "a"
+    assert root.get(CIDR("192.0.2.0/25")).value == "b"
+    assert root.get(CIDR("192.0.2.0/24")).value == "b"
+    assert root.get(CIDR("192.0.3.0/24")).value == "c"
+    assert root.get(CIDR("192.0.2.0/23")).value == "b"

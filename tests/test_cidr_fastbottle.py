@@ -154,6 +154,8 @@ def test_children():
     assert root._changed is True
     root.children()
     assert root._changed is False
+    result = [node.prefix.compressed for node in root.get(CIDR("14.99.56.0/21")).children()]
+    assert set(result) == {"14.99.56.0/21", "14.99.58.0/24"}
 
 
 def test_covering():

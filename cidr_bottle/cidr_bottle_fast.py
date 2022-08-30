@@ -113,11 +113,12 @@ class FastBottle:
             descendants = {}
             node = self
             passed = {}
+            origin = (self._prefix.ip, self._prefix.prefix_len)
             while True:
                 prefix = (node._prefix.ip, node._prefix.prefix_len)
                 if not node.passing and prefix not in descendants:
                     descendants[prefix] = node
-                if prefix in passed:
+                if prefix in passed and prefix != origin:
                     node = node.parent
                 elif (
                     node.left is not None
@@ -131,7 +132,7 @@ class FastBottle:
                     not in passed
                 ):
                     node = node.right
-                elif node.parent is not None:
+                elif node.parent is not None and (node.parent._prefix.ip, node.parent._prefix.prefix_len) != origin:
                     passed[prefix] = True
                     node = node.parent
                 else:
